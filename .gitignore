@@ -1,0 +1,51 @@
+# ── Python / Flask ─────────────────────────────────────────────────────────
+ml/.venv/
+ml/__pycache__/
+ml/**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── ML model binaries (large files — retrain from notebooks) ───────────────
+ml/models/*.pkl
+
+# ── ML generated images from notebooks ────────────────────────────────────
+ml/models/*.png
+
+# ── Training datasets ──────────────────────────────────────────────────────
+ml/data/*.csv
+
+# ── Jupyter checkpoints ────────────────────────────────────────────────────
+ml/notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+# ── Node / Express ─────────────────────────────────────────────────────────
+server/node_modules/
+server/package-lock.json
+
+# ── Environment variables ──────────────────────────────────────────────────
+server/.env
+.env
+.env.*
+!.env.example
+
+# ── React / Vite ───────────────────────────────────────────────────────────
+client/node_modules/
+client/dist/
+client/dist-ssr/
+client/package-lock.json
+
+# ── Logs ───────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── OS / Editor ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.sw?
