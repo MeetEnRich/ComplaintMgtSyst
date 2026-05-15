@@ -34,26 +34,28 @@ MongoDB Database
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | React.js, Vite, React Router, Axios, Recharts |
-| Backend | Node.js, Express.js, MongoDB, Mongoose, bcryptjs |
-| ML API | Python, Flask, Flask-CORS |
-| ML Models | Scikit-learn, LinearSVC, TF-IDF Vectorizer |
-| Database | MongoDB (local instance) |
-| Authentication | JSON Web Tokens (JWT) |
+| Layer          | Technology                                       |
+| -------------- | ------------------------------------------------ |
+| Frontend       | React.js, Vite, React Router, Axios, Recharts    |
+| Backend        | Node.js, Express.js, MongoDB, Mongoose, bcryptjs |
+| ML API         | Python, Flask, Flask-CORS                        |
+| ML Models      | Scikit-learn, LinearSVC, TF-IDF Vectorizer       |
+| Database       | MongoDB (local instance)                         |
+| Authentication | JSON Web Tokens (JWT)                            |
 
 ---
 
 ## ML Models
 
 ### Category Classifier
+
 - **Dataset:** CFPB Consumer Complaints (162,400 records)
 - **Algorithm:** LinearSVC with TF-IDF vectorization
 - **Classes:** Credit Card, Credit Reporting, Debt Collection, Mortgages and Loans, Retail Banking
 - **Accuracy:** 89.14%
 
 ### Sentiment Classifier
+
 - **Dataset:** Customer Complaints Sentiment and Priority (1,750 records)
 - **Algorithm:** LinearSVC with class balancing and TF-IDF vectorization
 - **Classes:** Negative (0), Neutral (1)
@@ -120,6 +122,7 @@ complaint_mgt/
 ### First Time Setup
 
 **1. Set up Python virtual environment**
+
 ```bash
 cd ml
 python -m venv .venv
@@ -130,12 +133,14 @@ pip install -r requirements.txt
 **2. Add training datasets**
 
 The datasets are not included in the repository. Place the following files in `ml/data/` before running the notebooks:
+
 - `complaints_processed.csv` — CFPB Consumer Complaints dataset
 - `customer_complaints_sentiment.csv` — Sentiment and Priority dataset
 
 **3. Train the models**
 
 Open VS Code, navigate to `ml/notebooks/` and run both notebooks in order using the **Complaint MGT (venv)** kernel:
+
 - `01_category_classifier.ipynb`
 - `02_sentiment_classifier.ipynb`
 
@@ -144,27 +149,32 @@ This will generate the four `.pkl` model files in `ml/models/`.
 **4. Configure environment variables**
 
 Copy `server/.env.example` to `server/.env` and fill in the values:
+
 ```bash
 cp server/.env.example server/.env
 ```
 
 To generate a bcrypt hash for your admin password:
+
 ```bash
 node -e "const b = require('bcryptjs'); b.hash('your_password', 12).then(h => console.log(h))"
 ```
 
 To generate a strong JWT secret:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
 **5. Install backend dependencies**
+
 ```bash
 cd server
 npm install
 ```
 
 **6. Install frontend dependencies**
+
 ```bash
 cd client
 npm install
@@ -179,6 +189,7 @@ Double-click `start.bat` from the project root. It starts all three servers and 
 Or run each server manually:
 
 **Terminal 1 — Flask ML API**
+
 ```bash
 cd ml
 .venv\Scripts\activate
@@ -186,12 +197,14 @@ python app.py
 ```
 
 **Terminal 2 — Express Backend**
+
 ```bash
 cd server
 npm run dev
 ```
 
 **Terminal 3 — React Frontend**
+
 ```bash
 cd client
 npm run dev
@@ -201,14 +214,15 @@ npm run dev
 
 ## Access the Application
 
-| Service | URL |
-|---|---|
-| Web Application | http://localhost:5173 |
-| Admin Login | http://localhost:5173/login |
-| Express API | http://localhost:5001 |
-| Flask ML API | http://localhost:5000 |
+| Service         | URL                         |
+| --------------- | --------------------------- |
+| Web Application | http://localhost:5173       |
+| Admin Login     | http://localhost:5173/login |
+| Express API     | http://localhost:5001       |
+| Flask ML API    | http://localhost:5000       |
 
 **Default Admin Credentials:**
+
 ```
 Username : admin
 Password : admin1234
@@ -220,26 +234,26 @@ Password : admin1234
 
 ### Authentication
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/auth/login | Admin login — returns JWT token |
+| Method | Endpoint        | Description                     |
+| ------ | --------------- | ------------------------------- |
+| POST   | /api/auth/login | Admin login — returns JWT token |
 
 ### Complaints
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| POST | /api/complaints | Public | Submit a new complaint |
-| GET | /api/complaints/:id | Public | Track a complaint by ID |
-| GET | /api/complaints | Admin | Get all complaints with filters |
-| GET | /api/complaints/stats | Admin | Dashboard statistics |
-| PATCH | /api/complaints/:id/status | Admin | Update complaint status |
+| Method | Endpoint                   | Access | Description                     |
+| ------ | -------------------------- | ------ | ------------------------------- |
+| POST   | /api/complaints            | Public | Submit a new complaint          |
+| GET    | /api/complaints/:id        | Public | Track a complaint by ID         |
+| GET    | /api/complaints            | Admin  | Get all complaints with filters |
+| GET    | /api/complaints/stats      | Admin  | Dashboard statistics            |
+| PATCH  | /api/complaints/:id/status | Admin  | Update complaint status         |
 
 ### ML API (Flask)
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | /health | Health check |
-| POST | /predict | Classify complaint — returns category, sentiment, priority |
+| Method | Endpoint | Description                                                |
+| ------ | -------- | ---------------------------------------------------------- |
+| GET    | /health  | Health check                                               |
+| POST   | /predict | Classify complaint — returns category, sentiment, priority |
 
 ---
 
