@@ -4,29 +4,51 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 import Navbar from '../components/Navbar'
 import { getDashboardStats, getAllComplaints, updateComplaintStatus } from '../services/api'
 
-const COLORS = ['#e94560', '#1a1a2e', '#10b981', '#f59e0b', '#6366f1']
+const COLORS = ['#e94560', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
 
-// ── Toast ──────────────────────────────────────────────────────────────────
+/* ── Toast ─────────────────────────────────────────────────────────── */
 const Toast = ({ message, type }) => {
   if (!message) return null
-  const bg = type === 'error' ? '#fff0f3' : '#ecfdf5'
-  const color = type === 'error' ? '#e94560' : '#10b981'
+  const isError = type === 'error'
   return (
-    <div style={{ position: 'fixed', bottom: '28px', right: '28px', background: bg, color, border: `1px solid ${color}30`, borderRadius: '10px', padding: '14px 20px', fontSize: '13px', fontWeight: '600', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', zIndex: 999, maxWidth: '320px' }}>
+    <div style={{
+      position: 'fixed', bottom: '28px', right: '28px',
+      background: isError ? 'var(--accent-soft)' : 'var(--green-soft)',
+      color: isError ? 'var(--accent)' : 'var(--green)',
+      border: `1px solid ${isError ? 'rgba(233,69,96,0.2)' : 'rgba(16,185,129,0.2)'}`,
+      borderRadius: 'var(--radius-md)', padding: '14px 20px',
+      fontSize: '13px', fontWeight: 600, boxShadow: 'var(--shadow-md)',
+      zIndex: 999, maxWidth: '320px',
+      animation: 'slideUp 0.3s ease',
+    }}>
       {message}
     </div>
   )
 }
 
-// ── Complaint Detail Modal ────────────────────────────────────────────────
+/* ── Complaint Detail Modal ────────────────────────────────────────── */
 const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, statusColor }) => {
   if (!complaint) return null
   return (
-    <div style={m.overlay} onClick={onClose}>
-      <div style={m.modal} onClick={e => e.stopPropagation()}>
-        <div style={m.header}>
-          <span style={m.headerTitle}>Complaint Details</span>
-          <button style={m.closeBtn} onClick={onClose}>
+    <div style={{
+      position: 'fixed', inset: 0, background: 'var(--bg-overlay)',
+      zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '24px', animation: 'fadeIn 0.2s ease',
+    }} onClick={onClose}>
+      <div className="glass slide-up" style={{
+        width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto',
+        boxShadow: 'var(--shadow-lg)',
+      }} onClick={e => e.stopPropagation()}>
+        {/* header */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '20px 24px', borderBottom: '1px solid var(--border)',
+        }}>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)' }}>Complaint Details</span>
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-muted)', display: 'flex', padding: '4px',
+          }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}>
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
@@ -34,12 +56,20 @@ const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, sta
           </button>
         </div>
 
-        <div style={m.textBox}>
-          <div style={m.textLabel}>Complaint Text</div>
-          <p style={m.textContent}>{complaint.complaint_text}</p>
+        {/* complaint text */}
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{
+            fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)',
+            textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px',
+          }}>Complaint Text</div>
+          <p style={{
+            fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.7,
+            whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+          }}>{complaint.complaint_text}</p>
         </div>
 
-        <div style={m.grid}>
+        {/* data rows */}
+        <div style={{ padding: '8px 24px' }}>
           {[
             { label: 'Complaint ID', value: complaint._id },
             { label: 'Category',     value: complaint.category },
@@ -47,25 +77,34 @@ const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, sta
             { label: 'Submitted',    value: new Date(complaint.submittedAt).toLocaleString() },
             ...(complaint.resolvedAt ? [{ label: 'Resolved', value: new Date(complaint.resolvedAt).toLocaleString() }] : [])
           ].map((row, i) => (
-            <div key={i} style={m.row}>
-              <span style={m.rowLabel}>{row.label}</span>
-              <span style={m.rowValue}>{row.value}</span>
+            <div key={i} className="data-row">
+              <span className="data-label">{row.label}</span>
+              <span className="data-value">{row.value}</span>
             </div>
           ))}
-          <div style={m.row}>
-            <span style={m.rowLabel}>Priority</span>
-            <span style={{ ...m.badge, background: priorityColor(complaint.priority) + '20', color: priorityColor(complaint.priority) }}>{complaint.priority}</span>
+          <div className="data-row">
+            <span className="data-label">Priority</span>
+            <span className="badge" style={{
+              background: priorityColor(complaint.priority) === 'var(--accent)' ? 'var(--accent-soft)' : 'var(--green-soft)',
+              color: priorityColor(complaint.priority) === 'var(--accent)' ? 'var(--accent)' : 'var(--green)',
+            }}>{complaint.priority}</span>
           </div>
-          <div style={m.row}>
-            <span style={m.rowLabel}>Status</span>
-            <span style={{ ...m.badge, background: statusColor(complaint.status) + '20', color: statusColor(complaint.status) }}>{complaint.status}</span>
+          <div className="data-row">
+            <span className="data-label">Status</span>
+            <span className="badge" style={{
+              background: complaint.status === 'Resolved' ? 'var(--green-soft)' : complaint.status === 'In Progress' ? 'var(--amber-soft)' : 'rgba(255,255,255,0.06)',
+              color: statusColor(complaint.status),
+            }}>{complaint.status}</span>
           </div>
         </div>
 
-        <div style={m.footer}>
-          <label style={m.selectLabel}>Update Status</label>
-          <select
-            style={m.select}
+        {/* footer */}
+        <div style={{
+          padding: '16px 24px', borderTop: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', gap: '12px',
+        }}>
+          <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>Update Status</label>
+          <select className="input" style={{ flex: 1, padding: '9px 12px', fontSize: '13px' }}
             value={complaint.status}
             onChange={e => onStatusUpdate(complaint._id, e.target.value)}>
             <option>Pending</option>
@@ -78,69 +117,44 @@ const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, sta
   )
 }
 
-const m = {
-  overlay:     { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' },
-  modal:       { background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.25)' },
-  header:      { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #f4f6f9' },
-  headerTitle: { fontSize: '15px', fontWeight: '700', color: '#1a1a2e' },
-  closeBtn:    { background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: '4px' },
-  textBox:     { padding: '20px 24px', borderBottom: '1px solid #f4f6f9' },
-  textLabel:   { fontSize: '11px', fontWeight: '700', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' },
-  textContent: { fontSize: '14px', color: '#1a1a2e', lineHeight: '1.7', whiteSpace: 'pre-wrap', wordBreak: 'break-word' },
-  grid:        { padding: '8px 24px' },
-  row:         { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid #f4f6f9' },
-  rowLabel:    { fontSize: '13px', color: '#9ca3af', fontWeight: '500' },
-  rowValue:    { fontSize: '13px', fontWeight: '600', color: '#1a1a2e', maxWidth: '60%', textAlign: 'right', wordBreak: 'break-all' },
-  badge:       { padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' },
-  footer:      { padding: '16px 24px', borderTop: '1px solid #f4f6f9', display: 'flex', alignItems: 'center', gap: '12px' },
-  selectLabel: { fontSize: '13px', fontWeight: '600', color: '#1a1a2e', whiteSpace: 'nowrap' },
-  select:      { flex: 1, padding: '9px 12px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '13px', fontFamily: 'inherit' },
-}
-
+/* ── Skeleton ──────────────────────────────────────────────────────── */
 const Skeleton = ({ width = '100%', height = '16px', radius = '6px', style = {} }) => (
   <div style={{
     width, height, borderRadius: radius,
-    background: 'linear-gradient(90deg, #e5e7eb 25%, #f4f6f9 50%, #e5e7eb 75%)',
-    backgroundSize: '200% 100%',
-    animation: 'shimmer 1.4s infinite',
-    ...style
+    background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+    backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', ...style,
   }} />
 )
 
 const DashboardSkeleton = () => (
   <>
-    <style>{`@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`}</style>
-    <div style={s.statsGrid}>
+    <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '28px' }}>
       {Array(5).fill(0).map((_, i) => (
-        <div key={i} style={s.statCard}>
+        <div key={i} className="card" style={{ padding: '20px', textAlign: 'center' }}>
           <Skeleton width="50%" height="36px" radius="8px" style={{ margin: '0 auto 10px' }} />
           <Skeleton width="70%" height="12px" style={{ margin: '0 auto' }} />
         </div>
       ))}
     </div>
-    <div style={s.chartsRow}>
+    <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
       {Array(2).fill(0).map((_, i) => (
-        <div key={i} style={s.chartCard}>
+        <div key={i} className="card" style={{ padding: '24px' }}>
           <Skeleton width="40%" height="16px" style={{ marginBottom: '20px' }} />
           <Skeleton width="100%" height="180px" radius="8px" />
-        </div>
-      ))}
-    </div>
-    <div style={s.tableWrap}>
-      {Array(5).fill(0).map((_, i) => (
-        <div key={i} style={{ padding: '16px', borderBottom: '1px solid #f4f6f9', display: 'flex', gap: '16px' }}>
-          <Skeleton width="30%" />
-          <Skeleton width="15%" />
-          <Skeleton width="12%" />
-          <Skeleton width="12%" />
-          <Skeleton width="12%" />
         </div>
       ))}
     </div>
   </>
 )
 
-// ── Main component ─────────────────────────────────────────────────────────
+/* ── Chart theme ───────────────────────────────────────────────────── */
+const tooltipStyle = {
+  fontSize: '12px', borderRadius: '8px',
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(15,15,26,0.95)', color: '#f0f0f5',
+}
+
+/* ── Main ──────────────────────────────────────────────────────────── */
 const DashboardPage = () => {
   const navigate = useNavigate()
   const [stats, setStats]           = useState(null)
@@ -188,7 +202,6 @@ const DashboardPage = () => {
     try {
       await updateComplaintStatus(id, status)
       showToast(`Status updated to "${status}"`)
-      // refresh list and update modal if open
       const [statsRes, complaintsRes] = await Promise.all([
         getDashboardStats(),
         getAllComplaints({ ...filters, page, limit: 10 })
@@ -204,83 +217,88 @@ const DashboardPage = () => {
     }
   }
 
-  const priorityColor = (p) => p === 'Urgent' ? '#e94560' : '#10b981'
-  const statusColor   = (s) => s === 'Resolved' ? '#10b981' : s === 'In Progress' ? '#f59e0b' : '#9ca3af'
+  const priorityColor = (p) => p === 'Urgent' ? 'var(--accent)' : 'var(--green)'
+  const statusColor   = (s) => s === 'Resolved' ? 'var(--green)' : s === 'In Progress' ? 'var(--amber)' : 'var(--text-muted)'
 
-  // Normalise chart data from aggregation arrays
   const categoryData  = stats?.byCategory?.map(d => ({ name: d._id, value: d.count })) ?? []
   const sentimentData = stats?.bySentiment?.map(d => ({ name: d._id, value: d.count })) ?? []
   const priorityData  = stats?.byPriority?.map(d => ({ name: d._id, value: d.count })) ?? []
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f4f6f9' }}>
+    <div className="page">
       <Navbar isAdmin />
-      <div style={s.container}>
-        <h2 style={s.title}>Dashboard</h2>
+      <div className="container fade-in">
+        <h2 className="section-title" style={{ marginBottom: '28px' }}>Dashboard</h2>
 
         {networkError && (
-          <div style={s.networkError}>
+          <div className="error-msg" style={{
+            display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px',
+          }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '16px', height: '16px', flexShrink: 0 }}>
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             {networkError}
-            <button onClick={fetchData} style={s.retryBtn}>Retry</button>
+            <button className="btn btn-primary btn-sm" onClick={fetchData} style={{ marginLeft: 'auto', padding: '5px 14px', fontSize: '12px' }}>Retry</button>
           </div>
         )}
 
         {loading ? <DashboardSkeleton /> : (
           <>
             {/* Stats */}
-            <div style={s.statsGrid}>
+            <div className="stagger stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '28px' }}>
               {[
-                { label: 'Total Complaints', value: stats?.total,      color: '#1a1a2e' },
-                { label: 'Pending',          value: stats?.pending,    color: '#9ca3af' },
-                { label: 'In Progress',      value: stats?.inProgress, color: '#f59e0b' },
-                { label: 'Resolved',         value: stats?.resolved,   color: '#10b981' },
-                { label: 'Urgent',           value: stats?.urgent,     color: '#e94560' },
+                { label: 'Total Complaints', value: stats?.total,      color: 'var(--text-primary)' },
+                { label: 'Pending',          value: stats?.pending,    color: 'var(--text-muted)' },
+                { label: 'In Progress',      value: stats?.inProgress, color: 'var(--amber)' },
+                { label: 'Resolved',         value: stats?.resolved,   color: 'var(--green)' },
+                { label: 'Urgent',           value: stats?.urgent,     color: 'var(--accent)' },
               ].map((stat, i) => (
-                <div key={i} style={s.statCard}>
-                  <div style={{ ...s.statValue, color: stat.color }}>{stat.value ?? 0}</div>
-                  <div style={s.statLabel}>{stat.label}</div>
+                <div key={i} className="card slide-up" style={{ padding: '20px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: stat.color, marginBottom: '6px' }}>{stat.value ?? 0}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.label}</div>
                 </div>
               ))}
             </div>
 
             {/* Charts */}
-            <div style={s.chartsRow}>
-              <div style={s.chartCard}>
-                <div style={s.chartTitle}>Complaints by Category</div>
+            <div className="charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' }}>
+              <div className="card" style={{ padding: '24px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Complaints by Category</div>
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={categoryData} margin={{ top: 0, right: 0, left: -20, bottom: 40 }}>
-                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6b7280' }} angle={-25} textAnchor="end" interval={0} />
-                    <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} allowDecimals={false} />
-                    <Tooltip contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                    <Bar dataKey="value" fill="#1a1a2e" radius={[4, 4, 0, 0]} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#8b8fa3' }} angle={-25} textAnchor="end" interval={0} />
+                    <YAxis tick={{ fontSize: 11, fill: '#8b8fa3' }} allowDecimals={false} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
 
-              <div style={s.chartCard}>
-                <div style={s.chartTitle}>Sentiment & Priority Split</div>
+              <div className="card" style={{ padding: '24px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Sentiment &amp; Priority Split</div>
                 <div style={{ display: 'flex', gap: '8px', height: '200px' }}>
                   <ResponsiveContainer width="50%" height="100%">
                     <PieChart>
-                      <Pie data={sentimentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} style={{ fontSize: '11px' }}>
+                      <Pie data={sentimentData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false} style={{ fontSize: '11px' }}>
                         {sentimentData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                      <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', color: '#8b8fa3' }} />
                     </PieChart>
                   </ResponsiveContainer>
                   <ResponsiveContainer width="50%" height="100%">
                     <PieChart>
-                      <Pie data={priorityData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} style={{ fontSize: '11px' }}>
+                      <Pie data={priorityData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false} style={{ fontSize: '11px' }}>
                         {priorityData.map((_, i) => <Cell key={i} fill={i === 0 ? '#e94560' : '#10b981'} />)}
                       </Pie>
-                      <Tooltip contentStyle={{ fontSize: '12px', borderRadius: '8px', border: '1px solid #e5e7eb' }} />
-                      <Legend iconSize={10} wrapperStyle={{ fontSize: '11px' }} />
+                      <Tooltip contentStyle={tooltipStyle} />
+                      <Legend iconSize={10} wrapperStyle={{ fontSize: '11px', color: '#8b8fa3' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -288,15 +306,13 @@ const DashboardPage = () => {
             </div>
 
             {/* Filters */}
-            <div style={s.filters}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
               {[
-                { key: 'status',   options: ['Pending', 'In Progress', 'Resolved'],                                                              label: 'Status'   },
-                { key: 'priority', options: ['Urgent', 'Not Urgent'],                                                                            label: 'Priority' },
-                { key: 'category', options: ['Credit Card', 'Credit Reporting', 'Debt Collection', 'Mortgages and Loans', 'Retail Banking'],     label: 'Category' },
+                { key: 'status',   options: ['Pending', 'In Progress', 'Resolved'],                                                          label: 'Status'   },
+                { key: 'priority', options: ['Urgent', 'Not Urgent'],                                                                        label: 'Priority' },
+                { key: 'category', options: ['Credit Card', 'Credit Reporting', 'Debt Collection', 'Mortgages and Loans', 'Retail Banking'], label: 'Category' },
               ].map(f => (
-                <select
-                  key={f.key}
-                  style={s.select}
+                <select key={f.key} className="input" style={{ width: 'auto', minWidth: '140px', padding: '10px 36px 10px 14px', fontSize: '13px' }}
                   value={filters[f.key]}
                   onChange={e => { setFilters({ ...filters, [f.key]: e.target.value }); setPage(1) }}>
                   <option value="">All {f.label}s</option>
@@ -306,39 +322,57 @@ const DashboardPage = () => {
             </div>
 
             {/* Table */}
-            <div style={s.tableWrap}>
-              <table style={s.table}>
+            <div className="card table-responsive" style={{ overflow: 'hidden', marginBottom: '24px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={s.thead}>
+                  <tr style={{ background: 'var(--bg-surface)' }}>
                     {['Complaint', 'Category', 'Sentiment', 'Priority', 'Status', 'Submitted', 'Action'].map(h => (
-                      <th key={h} style={s.th}>{h}</th>
+                      <th key={h} style={{
+                        padding: '14px 16px', textAlign: 'left', fontSize: '11px', fontWeight: 700,
+                        color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
+                      }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {complaints.length === 0 ? (
-                    <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#9ca3af' }}>No complaints found</td></tr>
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+                        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '48px', height: '48px', color: 'var(--text-secondary)', opacity: 0.5 }}>
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                          </svg>
+                          <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>No complaints found</span>
+                          <span style={{ fontSize: '13px' }}>Try adjusting or clearing your filters.</span>
+                          {(filters.status || filters.priority || filters.category) && (
+                            <button className="btn btn-secondary btn-sm" style={{ marginTop: '8px' }} onClick={() => { setFilters({ status: '', priority: '', category: '' }); setPage(1) }}>
+                              Clear Filters
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                   ) : complaints.map(c => (
-                    <tr key={c._id} style={{ ...s.tr, cursor: 'pointer' }} onClick={() => setSelectedComplaint(c)}>
-                      <td style={{ ...s.td, maxWidth: '220px' }}>
-                        <div style={s.complaintText}>{c.complaint_text}</div>
+                    <tr key={c._id} style={{ borderBottom: '1px solid var(--border)', cursor: 'pointer', transition: 'background 0.15s' }}
+                      onClick={() => setSelectedComplaint(c)}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-primary)', verticalAlign: 'middle', maxWidth: '220px' }}>
+                        <div style={{ maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.complaint_text}</div>
                       </td>
-                      <td style={s.td}>{c.category}</td>
-                      <td style={s.td}>{c.sentiment}</td>
-                      <td style={s.td}>
-                        <span style={{ ...s.badge, background: priorityColor(c.priority) + '20', color: priorityColor(c.priority) }}>
-                          {c.priority}
-                        </span>
+                      <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-primary)', verticalAlign: 'middle' }}>{c.category}</td>
+                      <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-primary)', verticalAlign: 'middle' }}>{c.sentiment}</td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
+                        <span className={`badge ${c.priority === 'Urgent' ? 'badge-accent' : 'badge-green'}`}>{c.priority}</span>
                       </td>
-                      <td style={s.td}>
-                        <span style={{ ...s.badge, background: statusColor(c.status) + '20', color: statusColor(c.status) }}>
-                          {c.status}
-                        </span>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }}>
+                        <span className={`badge ${c.status === 'Resolved' ? 'badge-green' : c.status === 'In Progress' ? 'badge-amber' : 'badge-muted'}`}>{c.status}</span>
                       </td>
-                      <td style={s.td}>{new Date(c.submittedAt).toLocaleDateString()}</td>
-                      <td style={s.td} onClick={e => e.stopPropagation()}>
-                        <select
-                          style={s.actionSelect}
+                      <td style={{ padding: '14px 16px', fontSize: '13px', color: 'var(--text-secondary)', verticalAlign: 'middle' }}>{new Date(c.submittedAt).toLocaleDateString()}</td>
+                      <td style={{ padding: '14px 16px', verticalAlign: 'middle' }} onClick={e => e.stopPropagation()}>
+                        <select className="input" style={{ width: 'auto', padding: '6px 30px 6px 10px', fontSize: '12px' }}
                           value={c.status}
                           onChange={e => handleStatusUpdate(c._id, e.target.value)}>
                           <option>Pending</option>
@@ -353,10 +387,12 @@ const DashboardPage = () => {
             </div>
 
             {/* Pagination */}
-            <div style={s.pagination}>
-              <button style={s.pageBtn} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</button>
-              <span style={s.pageInfo}>Page {page} — {total} total</span>
-              <button style={s.pageBtn} onClick={() => setPage(p => p + 1)} disabled={page * 10 >= total}>Next</button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+              <button className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Previous</button>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                Showing {total === 0 ? 0 : (page - 1) * 10 + 1}–{Math.min(page * 10, total)} of {total}
+              </span>
+              <button className="btn btn-secondary btn-sm" onClick={() => setPage(p => p + 1)} disabled={page * 10 >= total}>Next</button>
             </div>
           </>
         )}
@@ -371,34 +407,6 @@ const DashboardPage = () => {
       />
     </div>
   )
-}
-
-const s = {
-  container:     { maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' },
-  title:         { fontSize: '26px', fontWeight: '800', color: '#1a1a2e', marginBottom: '28px' },
-  statsGrid:     { display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '28px' },
-  statCard:      { background: '#fff', borderRadius: '12px', padding: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', textAlign: 'center' },
-  statValue:     { fontSize: '32px', fontWeight: '800', marginBottom: '6px' },
-  statLabel:     { fontSize: '12px', color: '#9ca3af', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  chartsRow:     { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '28px' },
-  chartCard:     { background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
-  chartTitle:    { fontSize: '13px', fontWeight: '700', color: '#1a1a2e', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  filters:       { display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' },
-  select:        { padding: '10px 14px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '13px', background: '#fff', fontFamily: 'inherit' },
-  tableWrap:     { background: '#fff', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' },
-  table:         { width: '100%', borderCollapse: 'collapse' },
-  thead:         { background: '#f4f6f9' },
-  th:            { padding: '14px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.5px' },
-  tr:            { borderBottom: '1px solid #f4f6f9' },
-  td:            { padding: '14px 16px', fontSize: '13px', color: '#1a1a2e', verticalAlign: 'middle' },
-  complaintText: { maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  badge:         { padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' },
-  actionSelect:  { padding: '6px 10px', borderRadius: '6px', border: '1px solid #e5e7eb', fontSize: '12px', fontFamily: 'inherit' },
-  pagination:    { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginTop: '24px' },
-  pageBtn:       { background: '#1a1a2e', color: '#fff', padding: '8px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: '600' },
-  pageInfo:      { fontSize: '13px', color: '#6b7280' },
-  networkError:  { display: 'flex', alignItems: 'center', gap: '10px', background: '#fff0f3', color: '#e94560', border: '1px solid #e9456020', borderRadius: '10px', padding: '12px 16px', fontSize: '13px', fontWeight: '500', marginBottom: '24px' },
-  retryBtn:      { marginLeft: 'auto', background: '#e94560', color: '#fff', padding: '5px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', border: 'none', cursor: 'pointer' },
 }
 
 export default DashboardPage

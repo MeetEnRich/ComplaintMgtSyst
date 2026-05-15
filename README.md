@@ -148,7 +148,7 @@ This will generate the four `.pkl` model files in `ml/models/`.
 
 **4. Configure environment variables**
 
-Copy `server/.env.example` to `server/.env` and fill in the values:
+**Backend:** Copy `server/.env.example` to `server/.env` and fill in the values:
 
 ```bash
 cp server/.env.example server/.env
@@ -166,6 +166,12 @@ To generate a strong JWT secret:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
+**Frontend:** Create a `client/.env` file and set your API URL:
+
+```bash
+echo VITE_API_URL=http://localhost:5001/api > client/.env
+```
+
 **5. Install backend dependencies**
 
 ```bash
@@ -178,6 +184,15 @@ npm install
 ```bash
 cd client
 npm install
+```
+
+**7. Seed the Database (Optional)**
+
+Populate the MongoDB database with 50 mock complaints for demonstration purposes:
+
+```bash
+cd server
+npm run seed
 ```
 
 ---

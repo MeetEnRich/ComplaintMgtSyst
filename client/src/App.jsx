@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import LandingPage from './pages/LandingPage'
 import SubmitPage from './pages/SubmitPage'
 import ResultPage from './pages/ResultPage'
@@ -10,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/"        element={<LandingPage />} />
         <Route path="/submit"  element={<SubmitPage />} />

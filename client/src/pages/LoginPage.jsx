@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loginAdmin } from '../services/api'
 
 const LoginPage = () => {
   const navigate  = useNavigate()
+  const usernameRef = useRef(null)
   const [form, setForm]     = useState({ username: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState('')
+
+  useEffect(() => { usernameRef.current?.focus() }, [])
 
   const handleLogin = async () => {
     setLoading(true)
@@ -23,49 +26,71 @@ const LoginPage = () => {
   }
 
   return (
-    <div style={s.wrapper}>
-      <div style={s.card}>
-        <div style={s.logo}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#e94560" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '40px', height: '40px' }}>
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-          </svg>
+    <div className="page" style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1030 50%, #0f0f1a 100%)',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* decorative glow */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '600px', height: '600px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(233,69,96,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
+      <div className="glass slide-up" style={{
+        padding: '48px 40px', width: '100%', maxWidth: '420px',
+        textAlign: 'center', position: 'relative', zIndex: 1,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div style={{
+            width: '56px', height: '56px', borderRadius: '50%',
+            background: 'var(--accent-soft)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ width: '28px', height: '28px' }}>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
         </div>
-        <h2 style={s.title}>Admin Login</h2>
-        <p style={s.sub}>ComplaintIQ Admin Panel</p>
-        {error && <div style={s.error}>{error}</div>}
+        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '6px' }}>Admin Login</h2>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '28px' }}>ComplaintIQ Admin Panel</p>
+
+        {error && <div className="error-msg">{error}</div>}
+
         <input
-          style={s.input}
+          ref={usernameRef}
+          className="input"
+          style={{ marginBottom: '14px' }}
           placeholder="Username"
           value={form.username}
           onChange={e => setForm({ ...form, username: e.target.value })}
         />
         <input
-          style={s.input}
+          className="input"
+          style={{ marginBottom: '14px' }}
           type="password"
           placeholder="Password"
           value={form.password}
           onChange={e => setForm({ ...form, password: e.target.value })}
           onKeyDown={e => e.key === 'Enter' && handleLogin()}
         />
-        <button style={s.btn} onClick={handleLogin} disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+        <button
+          className="btn btn-primary"
+          style={{ width: '100%', padding: '13px', fontSize: '15px', marginTop: '4px' }}
+          onClick={handleLogin}
+          disabled={loading}>
+          {loading ? <><span className="spinner" />Logging in...</> : 'Login'}
         </button>
-        <p style={s.hint}>Default: admin / admin1234</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '20px' }}>
+          Default: admin / admin1234
+        </p>
       </div>
     </div>
   )
-}
-
-const s = {
-  wrapper: { minHeight: '100vh', background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  card: { background: '#fff', borderRadius: '16px', padding: '48px 40px', width: '100%', maxWidth: '400px', textAlign: 'center' },
-  logo: { display: 'flex', justifyContent: 'center', marginBottom: '16px' },
-  title: { fontSize: '24px', fontWeight: '800', color: '#1a1a2e', marginBottom: '6px' },
-  sub: { fontSize: '13px', color: '#9ca3af', marginBottom: '28px' },
-  error: { background: '#fff0f3', color: '#e94560', padding: '10px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px' },
-  input: { display: 'block', width: '100%', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '14px', marginBottom: '14px', fontFamily: 'inherit' },
-  btn: { width: '100%', background: '#1a1a2e', color: '#fff', padding: '13px', borderRadius: '10px', fontSize: '15px', fontWeight: '700', marginTop: '4px' },
-  hint: { fontSize: '12px', color: '#9ca3af', marginTop: '16px' }
 }
 
 export default LoginPage

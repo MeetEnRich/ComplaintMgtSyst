@@ -195,7 +195,7 @@ const getDashboardStats = async (req, res) => {
         const pending  = await Complaint.countDocuments({ status: 'Pending' });
         const inProgress = await Complaint.countDocuments({ status: 'In Progress' });
         const resolved = await Complaint.countDocuments({ status: 'Resolved' });
-        const urgent   = await Complaint.countDocuments({ priority: 'Urgent' });
+        const urgent   = await Complaint.countDocuments({ priority: 'Urgent', status: { $ne: 'Resolved' } });
 
         const byCategory = await Complaint.aggregate([
             { $group: { _id: '$category', count: { $sum: 1 } } },

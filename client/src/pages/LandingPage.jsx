@@ -5,68 +5,88 @@ const LandingPage = () => {
   const navigate = useNavigate()
 
   return (
-    <div style={styles.wrapper}>
+    <div className="page">
       <Navbar />
 
-      <div style={styles.hero}>
-        <div style={styles.heroContent}>
-          <span style={styles.badge}>AI-Powered Complaint Management</span>
-          <h1 style={styles.title}>
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <section className="hero-section" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '80px 80px', gap: '60px', minHeight: '520px',
+        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1030 40%, #0f0f1a 100%)',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        {/* decorative glow */}
+        <div style={{
+          position: 'absolute', top: '-120px', right: '-80px',
+          width: '500px', height: '500px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div className="slide-up hero-content" style={{ flex: 1, maxWidth: '560px', position: 'relative', zIndex: 1 }}>
+          <span className="badge badge-accent" style={{
+            marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '11px',
+          }}>
+            AI-Powered Complaint Management
+          </span>
+          <h1 className="hero-title" style={{
+            fontSize: '52px', fontWeight: '900', color: 'var(--text-primary)',
+            lineHeight: 1.12, marginBottom: '20px', letterSpacing: '-1.5px',
+          }}>
             Your complaints, <br />
-            <span style={styles.accent}>heard and prioritized.</span>
+            <span style={{ color: 'var(--accent)' }}>heard and prioritized.</span>
           </h1>
-          <p style={styles.subtitle}>
+          <p style={{
+            fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '36px',
+          }}>
             ComplaintIQ uses machine learning to automatically classify,
             analyze, and prioritize your complaints — ensuring the most
             urgent issues are resolved first.
           </p>
-          <div style={styles.btnGroup}>
-            <button
-              style={styles.primaryBtn}
-              onClick={() => navigate('/submit')}>
+          <div className="btn-group" style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+            <button className="btn btn-primary" onClick={() => navigate('/submit')}
+              style={{ padding: '14px 32px', fontSize: '15px' }}>
               Complain
             </button>
-            <button
-              style={styles.secondaryBtn}
-              onClick={() => navigate('/login')}>
+            <button className="btn btn-secondary" onClick={() => navigate('/login')}
+              style={{ padding: '14px 32px', fontSize: '15px' }}>
               Admin
             </button>
           </div>
         </div>
-        <div style={styles.heroVisual}>
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <span style={styles.dot('green')} />
-              <span style={styles.cardTitle}>Complaint Classified</span>
-            </div>
-            <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>Category</span>
-              <span style={styles.cardValue}>Credit Card</span>
-            </div>
-            <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>Sentiment</span>
-              <span style={styles.cardValue}>Negative</span>
-            </div>
-            <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>Priority</span>
+
+        {/* preview card */}
+        <div className="slide-up" style={{ flex: '0 0 320px', animationDelay: '0.15s', position: 'relative', zIndex: 1, width: '100%', maxWidth: '320px' }}>
+          <div className="glass" style={{ padding: '28px', boxShadow: 'var(--shadow-lg), 0 0 60px rgba(233,69,96,0.08)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
               <span style={{
-                ...styles.cardValue,
-                color: '#e94560',
-                fontWeight: '700'
-              }}>Urgent</span>
+                width: '10px', height: '10px', borderRadius: '50%', background: 'var(--green)', display: 'inline-block',
+                boxShadow: '0 0 8px rgba(16,185,129,0.4)',
+              }} />
+              <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)' }}>Complaint Classified</span>
             </div>
-            <div style={styles.cardRow}>
-              <span style={styles.cardLabel}>Status</span>
-              <span style={{
-                ...styles.cardValue,
-                color: '#f59e0b'
-              }}>In Progress</span>
-            </div>
+            {[
+              { label: 'Category',  value: 'Credit Card',  color: null },
+              { label: 'Sentiment', value: 'Negative',     color: null },
+              { label: 'Priority',  value: 'Urgent',       color: 'var(--accent)' },
+              { label: 'Status',    value: 'In Progress',  color: 'var(--amber)' },
+            ].map((row, i) => (
+              <div key={i} className="data-row">
+                <span className="data-label">{row.label}</span>
+                <span className="data-value" style={row.color ? { color: row.color } : {}}>
+                  {row.value}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div style={styles.features}>
+      {/* ── Features ─────────────────────────────────────────────────── */}
+      <section className="stagger features-grid" style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '20px', padding: '60px 80px',
+      }}>
         {[
           {
             icon: (
@@ -112,172 +132,27 @@ const LandingPage = () => {
             desc: 'Admins track every complaint from submission through to full resolution.'
           }
         ].map((f, i) => (
-          <div key={i} style={styles.featureCard}>
-            <span style={styles.featureIcon}>{f.icon}</span>
-            <h3 style={styles.featureTitle}>{f.title}</h3>
-            <p style={styles.featureDesc}>{f.desc}</p>
+          <div key={i} className="card slide-up" style={{ padding: '28px 24px' }}>
+            <span style={{
+              width: '40px', height: '40px', marginBottom: '16px', display: 'block',
+              color: 'var(--accent)',
+            }}>{f.icon}</span>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '10px' }}>{f.title}</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.65 }}>{f.desc}</p>
           </div>
         ))}
-      </div>
+      </section>
 
-      <footer style={styles.footer}>
-        <p>ComplaintIQ &copy; 2026 — Final Year Project, Divine Oche Ajogi</p>
+      {/* ── Footer ───────────────────────────────────────────────────── */}
+      <footer style={{
+        textAlign: 'center', padding: '24px',
+        color: 'var(--text-muted)', fontSize: '13px',
+        borderTop: '1px solid var(--border)',
+      }}>
+        ComplaintIQ &copy; 2026 — Final Year Project, Divine Oche Ajogi
       </footer>
     </div>
   )
-}
-
-const styles = {
-  wrapper: {
-    minHeight: '100vh',
-    background: '#f4f6f9',
-  },
-  hero: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '80px 80px',
-    gap: '60px',
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-    minHeight: '520px',
-  },
-  heroContent: {
-    flex: 1,
-    maxWidth: '560px',
-  },
-  badge: {
-    display: 'inline-block',
-    background: 'rgba(233,69,96,0.15)',
-    color: '#e94560',
-    padding: '6px 14px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
-    letterSpacing: '0.5px',
-    marginBottom: '24px',
-    textTransform: 'uppercase',
-  },
-  title: {
-    fontSize: '52px',
-    fontWeight: '800',
-    color: '#ffffff',
-    lineHeight: '1.15',
-    marginBottom: '20px',
-    letterSpacing: '-1px',
-  },
-  accent: {
-    color: '#e94560',
-  },
-  subtitle: {
-    fontSize: '16px',
-    color: '#9ca3af',
-    lineHeight: '1.7',
-    marginBottom: '36px',
-  },
-  btnGroup: {
-    display: 'flex',
-    gap: '16px',
-    flexWrap: 'wrap',
-  },
-  primaryBtn: {
-    background: '#e94560',
-    color: '#ffffff',
-    padding: '14px 28px',
-    borderRadius: '10px',
-    fontSize: '15px',
-    fontWeight: '700',
-    transition: 'opacity 0.2s',
-  },
-  secondaryBtn: {
-    background: 'transparent',
-    color: '#ffffff',
-    padding: '14px 28px',
-    borderRadius: '10px',
-    fontSize: '15px',
-    fontWeight: '600',
-    border: '1px solid rgba(255,255,255,0.2)',
-  },
-  heroVisual: {
-    flex: '0 0 320px',
-  },
-  card: {
-    background: '#ffffff',
-    borderRadius: '16px',
-    padding: '28px',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-  },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    marginBottom: '20px',
-  },
-  dot: (color) => ({
-    width: '10px',
-    height: '10px',
-    borderRadius: '50%',
-    background: color === 'green' ? '#10b981' : '#e94560',
-    display: 'inline-block',
-  }),
-  cardTitle: {
-    fontWeight: '700',
-    fontSize: '15px',
-    color: '#1a1a2e',
-  },
-  cardRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '10px 0',
-    borderBottom: '1px solid #f4f6f9',
-  },
-  cardLabel: {
-    fontSize: '13px',
-    color: '#9ca3af',
-    fontWeight: '500',
-  },
-  cardValue: {
-    fontSize: '13px',
-    color: '#1a1a2e',
-    fontWeight: '600',
-  },
-  features: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: '24px',
-    padding: '60px 80px',
-  },
-  featureCard: {
-    background: '#ffffff',
-    borderRadius: '12px',
-    padding: '28px 24px',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-  },
-  featureIcon: {
-    width: '36px',
-    height: '36px',
-    marginBottom: '16px',
-    display: 'block',
-    color: '#e94560',
-  },
-  featureTitle: {
-    fontSize: '16px',
-    fontWeight: '700',
-    color: '#1a1a2e',
-    marginBottom: '10px',
-  },
-  featureDesc: {
-    fontSize: '13px',
-    color: '#6b7280',
-    lineHeight: '1.65',
-  },
-  footer: {
-    textAlign: 'center',
-    padding: '24px',
-    color: '#9ca3af',
-    fontSize: '13px',
-    borderTop: '1px solid #e5e7eb',
-  }
 }
 
 export default LandingPage
