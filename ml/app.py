@@ -77,6 +77,23 @@ def predict():
     # Sentiment prediction
     sent_vec      = sentiment_vectorizer.transform([clean])
     sentiment_raw = int(sentiment_model.predict(sent_vec)[0])
+    
+    # Keyword override: The small training dataset misses some explicit urgent terms.
+    # We forcefully assign negative/urgent sentiment if specific keywords are present.
+    urgent_keywords = [
+        # Action/Time critical
+        'urgent', 'immediately', 'asap', 'now!', 'emergency', 'rectified', 'fix this now', 'hurry',
+        # Fraud/Security
+        'stolen', 'fraud', 'scam', 'hacked', 'unauthorized', 'theft', 'robbed', 'phishing', 'breach', 'illegal', 'compromised',
+        # Financial Loss/Errors
+        'wrongfully', 'refund', 'missing funds', 'disappeared', 'tanked', 'ruined', 'lost my money', 'where is my money', 'charged twice',
+        # Legal/Escalation
+        'sue', 'lawyer', 'police', 'attorney', 'court', 'legal action', 'consumer protection', 'report you',
+        # Emotional Distress
+        'desperate', 'stranded', 'terrified', 'crying', 'devastated', 'homeless', 'starving'
+    ]
+    if any(keyword in raw_text.lower() for keyword in urgent_keywords):
+        sentiment_raw = 0
     sentiment     = SENTIMENT_MAP.get(sentiment_raw, 'Neutral')
 
     # Priority derived from sentiment

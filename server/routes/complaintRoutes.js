@@ -5,7 +5,8 @@ const {
     getAllComplaints,
     getComplaintById,
     updateComplaintStatus,
-    getDashboardStats
+    getDashboardStats,
+    deleteComplaint
 } = require('../controllers/complaintController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -16,6 +17,7 @@ router.post('/',   submitComplaint);
 router.get('/',             protect, getAllComplaints);
 router.get('/stats',        protect, getDashboardStats);
 router.patch('/:id/status', protect, updateComplaintStatus);
+router.delete('/:id',       protect, deleteComplaint);
 
 // Public — must be last to avoid swallowing /stats and /
 router.get('/:id', getComplaintById);

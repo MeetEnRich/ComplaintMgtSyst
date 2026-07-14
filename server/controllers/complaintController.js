@@ -233,10 +233,36 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// ── Delete a complaint (Admin only) ───────────────────────────────────────
+const deleteComplaint = async (req, res) => {
+    try {
+        const complaint = await Complaint.findByIdAndDelete(req.params.id);
+        
+        if (!complaint) {
+            return res.status(404).json({
+                success: false,
+                message: 'Complaint not found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Complaint deleted successfully'
+        });
+    } catch (error) {
+        console.error('Delete complaint error:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Server error. Please try again.'
+        });
+    }
+};
+
 module.exports = {
     submitComplaint,
     getAllComplaints,
     getComplaintById,
     updateComplaintStatus,
-    getDashboardStats
+    getDashboardStats,
+    deleteComplaint
 };

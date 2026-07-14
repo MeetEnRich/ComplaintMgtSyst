@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import Navbar from '../components/Navbar'
-import { getDashboardStats, getAllComplaints, updateComplaintStatus } from '../services/api'
+import { getDashboardStats, getAllComplaints, updateComplaintStatus, deleteComplaint } from '../services/api'
 
 const COLORS = ['#e94560', '#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
 
@@ -27,7 +27,7 @@ const Toast = ({ message, type }) => {
 }
 
 /* ── Complaint Detail Modal ────────────────────────────────────────── */
-const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, statusColor }) => {
+const ComplaintModal = ({ complaint, onClose, onStatusUpdate, onDelete, priorityColor, statusColor }) => {
   if (!complaint) return null
   return (
     <div style={{
@@ -101,16 +101,22 @@ const ComplaintModal = ({ complaint, onClose, onStatusUpdate, priorityColor, sta
         {/* footer */}
         <div style={{
           padding: '16px 24px', borderTop: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', gap: '12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap'
         }}>
-          <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>Update Status</label>
-          <select className="input" style={{ flex: 1, padding: '9px 12px', fontSize: '13px' }}
-            value={complaint.status}
-            onChange={e => onStatusUpdate(complaint._id, e.target.value)}>
-            <option>Pending</option>
-            <option>In Progress</option>
-            <option>Resolved</option>
-          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '200px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>Update Status</label>
+            <select className="input" style={{ flex: 1, padding: '9px 12px', fontSize: '13px' }}
+              value={complaint.status}
+              onChange={e => onStatusUpdate(complaint._id, e.target.value)}>
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+            </select>
+          </div>
+          <button className="btn btn-secondary" style={{ padding: '8px 16px', fontSize: '13px', color: 'var(--accent)', borderColor: 'var(--accent-soft)' }}
+            onClick={() => onDelete(complaint._id)}>
+            Delete Complaint
+          </button>
         </div>
       </div>
     </div>
@@ -202,18 +208,25 @@ const DashboardPage = () => {
     try {
       await updateComplaintStatus(id, status)
       showToast(`Status updated to "${status}"`)
-      const [statsRes, complaintsRes] = await Promise.all([
-        getDashboardStats(),
-        getAllComplaints({ ...filters, page, limit: 10 })
-      ])
-      setStats(statsRes.data.data)
-      setComplaints(complaintsRes.data.data)
-      setTotal(complaintsRes.data.total)
+      fetchData() // Refresh list and stats
       if (selectedComplaint?._id === id) {
         setSelectedComplaint(prev => ({ ...prev, status, resolvedAt: status === 'Resolved' ? new Date().toISOString() : prev.resolvedAt }))
       }
     } catch {
       showToast('Failed to update status. Please try again.', 'error')
+    }
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to permanently delete this complaint? This action cannot be undone.")) return;
+    
+    try {
+      await deleteComplaint(id)
+      showToast('Complaint deleted successfully')
+      setSelectedComplaint(null)
+      fetchData() // Refresh list and stats
+    } catch {
+      showToast('Failed to delete complaint. Please try again.', 'error')
     }
   }
 
@@ -402,6 +415,7 @@ const DashboardPage = () => {
         complaint={selectedComplaint}
         onClose={() => setSelectedComplaint(null)}
         onStatusUpdate={handleStatusUpdate}
+        onDelete={handleDelete}
         priorityColor={priorityColor}
         statusColor={statusColor}
       />
