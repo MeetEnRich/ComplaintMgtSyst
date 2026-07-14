@@ -28,7 +28,7 @@ const LoginPage = () => {
   return (
     <div className="page" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1030 50%, #0f0f1a 100%)',
+      background: 'linear-gradient(135deg, var(--bg-body) 0%, var(--bg-input) 50%, var(--bg-body) 100%)',
       position: 'relative', overflow: 'hidden',
     }}>
       {/* decorative glow */}

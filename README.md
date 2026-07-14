@@ -74,7 +74,7 @@ complaint_mgt/
 │   ├── notebooks/
 │   │   ├── 01_category_classifier.ipynb
 │   │   └── 02_sentiment_classifier.ipynb
-│   ├── models/                        # excluded from repo — retrain from notebooks
+│   ├── models/                        # contains trained .pkl files (tracked)
 │   ├── app.py
 │   └── requirements.txt
 │
@@ -89,6 +89,7 @@ complaint_mgt/
 │   │   ├── authRoutes.js
 │   │   └── complaintRoutes.js
 │   ├── .env.example
+│   ├── seed.js                        # database seeder script
 │   └── server.js
 │
 ├── client/
@@ -105,7 +106,8 @@ complaint_mgt/
 │       │   └── DashboardPage.jsx
 │       └── services/api.js
 │
-├── start.bat
+├── setup.bat                          # automated setup script
+├── start.bat                          # automated start script
 └── README.md
 ```
 
@@ -120,6 +122,12 @@ complaint_mgt/
 - MongoDB installed as a Windows service
 
 ### First Time Setup
+
+**Option A: Automated Setup (Windows)**
+
+Simply double-click the `setup.bat` script in the root directory. It will automatically check for prerequisites, install all Node and Python dependencies, and create the necessary `.env` files.
+
+**Option B: Manual Setup**
 
 **1. Set up Python virtual environment**
 

@@ -7,11 +7,18 @@ ml/**/__pycache__/
 *.pyd
 .Python
 
-# ── ML model binaries (large files — retrain from notebooks) ───────────────
-ml/models/*.pkl
+# ── ML model binaries ───────────────────────────────────────────────────────
+# (Models are now tracked by Git. Datasets remain excluded.)
 
-# ── ML generated images from notebooks ────────────────────────────────────
-ml/models/*.png
+# ── Image files ────────────────────────────────────────────────────────────
+# Explicitly ignoring all image files per user request
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.ico
 
 # ── Training datasets ──────────────────────────────────────────────────────
 ml/data/*.csv

@@ -62,7 +62,7 @@ const SubmitPage = () => {
           <textarea
             ref={textareaRef}
             className="input"
-            rows={8}
+            rows={5}
             placeholder="Describe your complaint here..."
             value={text}
             onChange={e => setText(e.target.value)}

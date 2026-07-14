@@ -12,7 +12,7 @@ const LandingPage = () => {
       <section className="hero-section" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '80px 80px', gap: '60px', minHeight: '520px',
-        background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1030 40%, #0f0f1a 100%)',
+        background: 'linear-gradient(135deg, var(--bg-body) 0%, var(--bg-input) 40%, var(--bg-body) 100%)',
         position: 'relative', overflow: 'hidden',
       }}>
         {/* decorative glow */}

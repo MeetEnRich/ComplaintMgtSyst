@@ -12,11 +12,12 @@ const Navbar = ({ isAdmin = false }) => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <nav className="glass" style={{
+      <nav className="glass" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '0 40px', height: '64px',
       position: 'sticky', top: 0, zIndex: 100,
-      borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+      borderBottom: '1px solid var(--border)',
+      boxShadow: 'var(--shadow-sm)',
       borderRadius: 0,
     }}>
       <Link to="/" style={{
