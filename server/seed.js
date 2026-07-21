@@ -1,5 +1,5 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const { sequelize } = require('./config/db');
 const Complaint = require('./models/Complaint');
 
 const mockComplaints = [
@@ -114,16 +114,14 @@ for (let i = 0; i < 43; i++) {
 
 const seedDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/complaint_mgt';
-    console.log(`Connecting to ${mongoUri}...`);
-    await mongoose.connect(mongoUri);
-    console.log('MongoDB connected.');
+    console.log(`Connecting to SQLite...`);
+    await sequelize.authenticate();
 
-    console.log('Clearing old complaints...');
-    await Complaint.deleteMany({});
+    console.log('Syncing database (clearing old complaints)...');
+    await sequelize.sync({ force: true });
     
     console.log(`Inserting ${mockComplaints.length} mock complaints...`);
-    await Complaint.insertMany(mockComplaints);
+    await Complaint.bulkCreate(mockComplaints);
 
     console.log('Database seeded successfully!');
     process.exit(0);

@@ -1,47 +1,65 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const ComplaintSchema = new mongoose.Schema({
+const Complaint = sequelize.define('Complaint', {
+    _id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
     complaint_text: {
-        type: String,
-        required: [true, 'Complaint text is required'],
-        trim: true,
-        minlength: [10, 'Complaint must be at least 10 characters']
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+            len: {
+                args: [10, 5000],
+                msg: "Complaint must be between 10 and 5000 characters"
+            }
+        }
     },
     category: {
-        type: String,
-        default: null
+        type: DataTypes.STRING,
+        allowNull: true
     },
     sentiment: {
-        type: String,
-        enum: ['Negative', 'Neutral', null],
-        default: null
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isIn: [['Negative', 'Neutral', null]]
+        }
     },
     sentiment_code: {
-        type: Number,
-        default: null
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     priority: {
-        type: String,
-        enum: ['Urgent', 'Not Urgent', null],
-        default: null
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isIn: [['Urgent', 'Not Urgent', null]]
+        }
     },
     priority_code: {
-        type: Number,
-        default: null
+        type: DataTypes.INTEGER,
+        allowNull: true
     },
     status: {
-        type: String,
-        enum: ['Pending', 'In Progress', 'Resolved'],
-        default: 'Pending'
+        type: DataTypes.STRING,
+        defaultValue: 'Pending',
+        validate: {
+            isIn: [['Pending', 'In Progress', 'Resolved']]
+        }
     },
     submittedAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW
     },
     resolvedAt: {
-        type: Date,
-        default: null
+        type: DataTypes.DATE,
+        allowNull: true
     }
+}, {
+    timestamps: false
 });
 
-module.exports = mongoose.model('Complaint', ComplaintSchema);
+module.exports = Complaint;

@@ -27,7 +27,7 @@ Flask ML Microservice     (port 5000)
         ↓
 SVM Classifiers (category + sentiment)
         ↓
-MongoDB Database
+SQLite Database (Local)
 ```
 
 ---
@@ -37,10 +37,10 @@ MongoDB Database
 | Layer          | Technology                                       |
 | -------------- | ------------------------------------------------ |
 | Frontend       | React.js, Vite, React Router, Axios, Recharts    |
-| Backend        | Node.js, Express.js, MongoDB, Mongoose, bcryptjs |
+| Backend        | Node.js, Express.js, Sequelize, SQLite, bcryptjs |
 | ML API         | Python, Flask, Flask-CORS                        |
 | ML Models      | Scikit-learn, LinearSVC, TF-IDF Vectorizer       |
-| Database       | MongoDB (local instance)                         |
+| Database       | SQLite (local file)                              |
 | Authentication | JSON Web Tokens (JWT)                            |
 
 ---
@@ -119,7 +119,6 @@ complaint_mgt/
 
 - Python 3.10+
 - Node.js 18+
-- MongoDB installed as a Windows service
 
 ### First Time Setup
 
@@ -196,7 +195,7 @@ npm install
 
 **7. Seed the Database (Optional)**
 
-Populate the MongoDB database with 50 mock complaints for demonstration purposes:
+Populate the SQLite database with 50 mock complaints for demonstration purposes:
 
 ```bash
 cd server

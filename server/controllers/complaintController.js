@@ -1,6 +1,7 @@
-
 const Complaint = require('../models/Complaint');
 const axios     = require('axios');
+const { Op }    = require('sequelize');
+const { sequelize } = require('../config/db');
 
 const MAX_LENGTH = 5000;
 
@@ -50,7 +51,7 @@ const submitComplaint = async (req, res) => {
             priority_code
         } = flaskResponse.data;
 
-        // Save to MongoDB
+        // Save to SQLite
         const complaint = await Complaint.create({
             complaint_text,
             category,
@@ -94,12 +95,14 @@ const getAllComplaints = async (req, res) => {
         if (category) filter.category = category;
 
         const skip  = (page - 1) * limit;
-        const total = await Complaint.countDocuments(filter);
+        const total = await Complaint.count({ where: filter });
 
-        const complaints = await Complaint.find(filter)
-            .sort({ submittedAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
+        const complaints = await Complaint.findAll({
+            where: filter,
+            order: [['submittedAt', 'DESC']],
+            offset: skip,
+            limit: parseInt(limit)
+        });
 
         return res.status(200).json({
             success: true,
@@ -121,7 +124,7 @@ const getAllComplaints = async (req, res) => {
 // ── Get single complaint ───────────────────────────────────────────────────
 const getComplaintById = async (req, res) => {
     try {
-        const complaint = await Complaint.findById(req.params.id);
+        const complaint = await Complaint.findByPk(req.params.id);
 
         if (!complaint) {
             return res.status(404).json({
@@ -157,21 +160,21 @@ const updateComplaintStatus = async (req, res) => {
             });
         }
 
-        const update = { status };
-        if (status === 'Resolved') update.resolvedAt = new Date();
+        const updateData = { status };
+        if (status === 'Resolved') updateData.resolvedAt = new Date();
 
-        const complaint = await Complaint.findByIdAndUpdate(
-            req.params.id,
-            update,
-            { new: true }
-        );
+        const [updatedRows] = await Complaint.update(updateData, {
+            where: { _id: req.params.id }
+        });
 
-        if (!complaint) {
+        if (updatedRows === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Complaint not found'
             });
         }
+
+        const complaint = await Complaint.findByPk(req.params.id);
 
         return res.status(200).json({
             success: true,
@@ -191,24 +194,42 @@ const updateComplaintStatus = async (req, res) => {
 // ── Dashboard analytics ───────────────────────────────────────────────────
 const getDashboardStats = async (req, res) => {
     try {
-        const total    = await Complaint.countDocuments();
-        const pending  = await Complaint.countDocuments({ status: 'Pending' });
-        const inProgress = await Complaint.countDocuments({ status: 'In Progress' });
-        const resolved = await Complaint.countDocuments({ status: 'Resolved' });
-        const urgent   = await Complaint.countDocuments({ priority: 'Urgent', status: { $ne: 'Resolved' } });
+        const total    = await Complaint.count();
+        const pending  = await Complaint.count({ where: { status: 'Pending' } });
+        const inProgress = await Complaint.count({ where: { status: 'In Progress' } });
+        const resolved = await Complaint.count({ where: { status: 'Resolved' } });
+        const urgent   = await Complaint.count({ where: { priority: 'Urgent', status: { [Op.ne]: 'Resolved' } } });
 
-        const byCategory = await Complaint.aggregate([
-            { $group: { _id: '$category', count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
-        ]);
+        // Aggregate functions mapped from Mongoose
+        const byCategoryRaw = await Complaint.findAll({
+            attributes: ['category', [sequelize.fn('COUNT', sequelize.col('category')), 'count']],
+            group: ['category'],
+            order: [[sequelize.col('count'), 'DESC']]
+        });
+        
+        const bySentimentRaw = await Complaint.findAll({
+            attributes: ['sentiment', [sequelize.fn('COUNT', sequelize.col('sentiment')), 'count']],
+            group: ['sentiment']
+        });
+        
+        const byPriorityRaw = await Complaint.findAll({
+            attributes: ['priority', [sequelize.fn('COUNT', sequelize.col('priority')), 'count']],
+            group: ['priority']
+        });
 
-        const bySentiment = await Complaint.aggregate([
-            { $group: { _id: '$sentiment', count: { $sum: 1 } } }
-        ]);
-
-        const byPriority = await Complaint.aggregate([
-            { $group: { _id: '$priority', count: { $sum: 1 } } }
-        ]);
+        // Format to match old Mongoose output: { _id: 'Value', count: Number }
+        const byCategory = byCategoryRaw.map(item => ({
+            _id: item.category,
+            count: item.get('count')
+        }));
+        const bySentiment = bySentimentRaw.map(item => ({
+            _id: item.sentiment,
+            count: item.get('count')
+        }));
+        const byPriority = byPriorityRaw.map(item => ({
+            _id: item.priority,
+            count: item.get('count')
+        }));
 
         return res.status(200).json({
             success: true,
@@ -236,9 +257,11 @@ const getDashboardStats = async (req, res) => {
 // ── Delete a complaint (Admin only) ───────────────────────────────────────
 const deleteComplaint = async (req, res) => {
     try {
-        const complaint = await Complaint.findByIdAndDelete(req.params.id);
+        const deletedRows = await Complaint.destroy({
+            where: { _id: req.params.id }
+        });
         
-        if (!complaint) {
+        if (deletedRows === 0) {
             return res.status(404).json({
                 success: false,
                 message: 'Complaint not found'

@@ -1,13 +1,27 @@
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
+const path = require('path');
+const fs = require('fs');
+
+const dataDir = path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: path.join(dataDir, 'database.sqlite'),
+  logging: false
+});
 
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        await sequelize.authenticate();
+        await sequelize.sync();
+        console.log('SQLite Database Connected & Synced.');
     } catch (error) {
-        console.error(`MongoDB Connection Error: ${error.message}`);
+        console.error(`SQLite Connection Error: ${error.message}`);
         process.exit(1);
     }
 };
 
-module.exports = connectDB;
+module.exports = { sequelize, connectDB };
